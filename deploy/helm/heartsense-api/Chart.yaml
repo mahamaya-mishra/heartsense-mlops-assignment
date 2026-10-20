@@ -1,0 +1,9 @@
+apiVersion: v2
+name: heartsense-api
+description: HeartSense heart-disease risk prediction API (FastAPI + scikit-learn)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords: [mlops, fastapi, scikit-learn, heart-disease]
+maintainers:
+  - name: HeartSense

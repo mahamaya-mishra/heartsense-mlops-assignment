@@ -1,0 +1,8 @@
+HeartSense API deployed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+  kubectl -n {{ .Release.Namespace }} get deploy,pods,svc,hpa -l app.kubernetes.io/instance={{ .Release.Name }}
+
+Reach the API (minikube):
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "heartsense.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+  curl -X POST http://127.0.0.1:{{ .Values.service.port }}/predict -H 'Content-Type: application/json' -d @examples/patient_high_risk.json
+  Swagger UI: http://127.0.0.1:{{ .Values.service.port }}/docs

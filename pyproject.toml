@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "heartsense"
+version = "1.0.0"
+description = "HeartSense: heart-disease risk classifier with an end-to-end MLOps pipeline (UCI Cleveland)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+  "numpy>=2.1",
+  "pandas>=2.2",
+  "scikit-learn>=1.6",
+  "joblib>=1.4",
+  "pydantic>=2.9",
+]
+
+[project.scripts]
+heartsense-ingest = "heartsense.ingest:main"
+heartsense-explore = "heartsense.explore:main"
+heartsense-train = "heartsense.train:main"
+heartsense-predict = "heartsense.predict:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["notebooks", ".venv", "mlruns"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF"]
+ignore = ["RUF012", "N803", "N806"]  # X / X_train are the scikit-learn convention
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]
+"scripts/build_notebook.py" = ["E501"]  # markdown prose cells
+"tools/build_report.py" = ["E501"]  # report prose
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+pythonpath = ["src", "."]
+markers = ["slow: end-to-end training runs (deselect with -m 'not slow')"]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::FutureWarning"]
+
+[tool.coverage.run]
+source = ["src/heartsense", "service"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true

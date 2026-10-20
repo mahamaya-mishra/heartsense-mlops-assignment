@@ -1,0 +1,197 @@
+# HeartSense CI/CD
+#   quality (ruff) ─┐
+#   helm-lint       ├─> unit-tests (3.11 + 3.12) ─> train-model (MLflow) ─> container (build, smoke test, publish)
+# Every job uploads its logs/outputs as workflow artifacts. Any failure stops the chain, so only a
+# tested, trained, smoke-tested image is ever pushed to GitHub Container Registry (main branch).
+name: mlops-pipeline
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["screenshots/**", "report/**", "docs/*.png", "**.md"]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      quick:
+        description: "Use the small hyper-parameter search (faster)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MLFLOW_DISABLE_AGENT_HINT: "1"
+  PYTHONPATH: src
+  IMAGE_NAME: heartsense-api
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  quality:
+    name: Lint & format (ruff)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install ruff==0.17.1
+      - name: ruff check
+        run: ruff check . --output-format=github | tee ruff-check.log
+      - name: ruff format --check
+        run: ruff format --check --diff . | tee ruff-format.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: lint-logs, path: "ruff-*.log"}
+
+  helm-lint:
+    name: Validate deployment manifests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - name: helm lint + template
+        run: |
+          helm lint deploy/helm/heartsense-api --set image.repository=heartsense-api
+          helm template heartsense deploy/helm/heartsense-api --set image.repository=heartsense-api > rendered.yaml
+          grep -c "^kind:" rendered.yaml
+      - name: Validate monitoring manifests with kubeconform
+        run: |
+          curl -fsSL https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz | tar xz
+          ./kubeconform -strict -summary rendered.yaml deploy/monitoring/k8s/
+      - uses: actions/upload-artifact@v4
+        with: {name: rendered-manifests, path: rendered.yaml}
+
+  unit-tests:
+    name: Unit tests (py${{ matrix.python }})
+    needs: [quality, helm-lint]
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: true
+      matrix:
+        python: ["3.12"]  # pinned numpy 2.5 ships wheels for 3.12+ only
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements.txt
+      - name: Acquire dataset (SHA-256 verified)
+        run: python -m heartsense.ingest | tee ingest.log
+      - name: pytest (with coverage, slow training test included)
+        run: |
+          pytest --junitxml=junit-${{ matrix.python }}.xml --cov --cov-report=xml:coverage-${{ matrix.python }}.xml \
+                 --cov-report=term-missing | tee pytest-${{ matrix.python }}.log
+      - name: Coverage summary
+        if: always()
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import xml.etree.ElementTree as ET
+          r = ET.parse("coverage-${{ matrix.python }}.xml").getroot()
+          print(f"### Coverage (py${{ matrix.python }}): {float(r.get('line-rate'))*100:.1f}% lines")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-reports-py${{ matrix.python }}
+          path: |
+            junit-*.xml
+            coverage-*.xml
+            pytest-*.log
+            ingest.log
+
+  train-model:
+    name: Train, track (MLflow) & export champion
+    needs: unit-tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements*.txt
+      - run: pip install -r requirements.txt
+      - run: python -m heartsense.ingest
+      - name: EDA figures
+        run: python -m heartsense.explore | tee eda.log
+      - name: Train
+        run: |
+          flag=""; [[ "${{ inputs.quick }}" == "true" ]] && flag="--quick"
+          python -m heartsense.train $flag 2>&1 | tee train.log
+      - name: Leaderboard in the run summary
+        run: |
+          echo "### Model leaderboard (CV = 5-fold x 2 repeats, selection on CV ROC-AUC)" >> "$GITHUB_STEP_SUMMARY"
+          cat reports/leaderboard.md >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          python -c "import json; m=json.load(open('model_store/metadata.json')); print(f\"**Champion:** {m['family']} (CV ROC-AUC {m['metrics']['cv_roc_auc_mean']:.3f}, test ROC-AUC {m['metrics']['test_roc_auc']:.3f})\")" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload model + MLflow store + reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model
+          path: |
+            model_store/
+            reports/
+            mlflow.db
+            mlruns/
+            train.log
+            eda.log
+          retention-days: 30
+
+  container:
+    name: Build image, smoke test & publish
+    needs: train-model
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: {name: trained-model, path: .}
+      - uses: docker/setup-buildx-action@v3
+      - name: Build
+        run: |
+          docker buildx build --load \
+            --label org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY} \
+            --label org.opencontainers.image.revision=${GITHUB_SHA} \
+            -t ${IMAGE_NAME}:${GITHUB_SHA::7} -t ${IMAGE_NAME}:latest . 2>&1 | tee docker-build.log
+          docker image inspect ${IMAGE_NAME}:latest --format 'image size: {{.Size}} bytes'
+      - name: Run container
+        run: docker run -d --name api -p 8000:8000 ${IMAGE_NAME}:latest
+      - name: Smoke test (readiness, predictions, validation, metrics)
+        run: bash scripts/smoke_test.sh http://127.0.0.1:8000 | tee smoke-test.log
+      - name: Container logs + health
+        if: always()
+        run: |
+          docker logs api > container.log 2>&1 || true
+          docker inspect --format 'healthcheck: {{.State.Health.Status}}' api || true
+          docker rm -f api || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: container-logs
+          path: |
+            docker-build.log
+            smoke-test.log
+            container.log
+      - name: Publish to ghcr.io (main only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          target="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/${IMAGE_NAME}"
+          echo "${TOKEN}" | docker login ghcr.io -u "${GITHUB_ACTOR}" --password-stdin
+          for tag in "${GITHUB_SHA::7}" latest; do
+            docker tag ${IMAGE_NAME}:latest "${target}:${tag}"
+            docker push "${target}:${tag}"
+          done
+          echo "Published \`${target}:${GITHUB_SHA::7}\` and \`${target}:latest\`" >> "$GITHUB_STEP_SUMMARY"

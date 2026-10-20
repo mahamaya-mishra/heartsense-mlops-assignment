@@ -1,0 +1,9 @@
+*
+!requirements-api.txt
+!pyproject.toml
+!README.md
+!src/
+!service/
+!model_store/heartsense_pipeline.joblib
+!model_store/metadata.json
+**/__pycache__

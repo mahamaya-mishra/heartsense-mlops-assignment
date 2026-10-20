@@ -1,0 +1,38 @@
+groups:
+  - name: heartsense-api
+    rules:
+      - alert: HeartSenseModelNotReady
+        expr: min(heartsense_model_ready) < 1
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: "A HeartSense replica is serving without a loaded model"
+      - alert: HeartSenseHighErrorRatio
+        expr: |
+          sum(rate(heartsense_http_requests_total{status=~"5.."}[5m]))
+            / sum(rate(heartsense_http_requests_total[5m])) > 0.05
+        for: 2m
+        labels: {severity: warning}
+        annotations:
+          summary: "More than 5 % of requests are failing with 5xx"
+      - alert: HeartSenseSlowPredictions
+        expr: |
+          histogram_quantile(0.95, sum(rate(heartsense_http_request_duration_seconds_bucket{path="/predict"}[5m])) by (le)) > 0.25
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "p95 /predict latency above 250 ms"
+      - alert: HeartSensePositiveRateDrift
+        expr: |
+          sum(rate(heartsense_predictions_total{label="disease"}[30m]))
+            / sum(rate(heartsense_predictions_total[30m])) > 0.70
+        for: 15m
+        labels: {severity: info}
+        annotations:
+          summary: "Share of positive predictions far above the 46 % training prevalence (possible drift)"
+      - alert: HeartSenseNoTraffic
+        expr: sum(rate(heartsense_http_requests_total{path="/predict"}[15m])) == 0
+        for: 30m
+        labels: {severity: info}
+        annotations:
+          summary: "No prediction traffic for 30 minutes"

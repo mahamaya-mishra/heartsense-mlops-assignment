@@ -1,0 +1,89 @@
+{
+  "model_name": "heartsense-heart-disease",
+  "model_version": "logistic_regression-v1",
+  "family": "logistic_regression",
+  "registry_version": 1,
+  "trained_at": "2026-10-20T18:29:22+00:00",
+  "heartsense_version": "1.0.0",
+  "git_sha": "unknown",
+  "mlflow_run_id": "ad66f27b19ef401b9139a6bec9ceda4b",
+  "mlflow_experiment_id": "1",
+  "dataset": {
+    "source": "https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/processed.cleveland.data",
+    "sha256": "a74b7efa387bc9d108d7d0115d831fe9b414b29ae7124f331b622b4efa0427c8",
+    "rows": 303,
+    "clean_file_sha256": "7d09db2e8a2203feac4959144108ca33c3cb4ba43442b69aba8b63d6aa9ed9ec"
+  },
+  "split": {
+    "test_fraction": 0.2,
+    "seed": 2025,
+    "n_train": 242,
+    "n_test": 61,
+    "train_positive_rate": 0.4587
+  },
+  "decision_threshold": 0.5,
+  "risk_tiers": [
+    [
+      0.25,
+      "low"
+    ],
+    [
+      0.5,
+      "moderate"
+    ],
+    [
+      0.75,
+      "elevated"
+    ],
+    [
+      1.01,
+      "high"
+    ]
+  ],
+  "input_features": [
+    "age",
+    "resting_bp",
+    "cholesterol",
+    "max_heart_rate",
+    "st_depression",
+    "major_vessels",
+    "sex",
+    "fasting_blood_sugar",
+    "exercise_angina",
+    "chest_pain_type",
+    "rest_ecg",
+    "st_slope",
+    "thalassemia"
+  ],
+  "hyperparameters": {
+    "C": 0.18881062335118487,
+    "class_weight": null,
+    "solver": "lbfgs"
+  },
+  "metrics": {
+    "cv_roc_auc_mean": 0.916778149386845,
+    "cv_roc_auc_std": 0.03315021222639258,
+    "cv_train_roc_auc_mean": 0.9418265816580422,
+    "cv_accuracy_mean": 0.8389030612244899,
+    "cv_recall_mean": 0.7701581027667984,
+    "cv_precision_mean": 0.868557019194891,
+    "cv_f1_mean": 0.8114694839866464,
+    "test_roc_auc": 0.9112554112554113,
+    "test_accuracy": 0.819672131147541,
+    "test_precision": 0.7741935483870968,
+    "test_recall": 0.8571428571428571,
+    "test_specificity": 0.7878787878787878,
+    "test_f1": 0.8135593220338984,
+    "test_average_precision": 0.9070300110432502,
+    "test_brier": 0.13013998461246934,
+    "test_false_negatives": 4,
+    "test_false_positives": 7,
+    "cv_fit_time_s": 0.020445871353149413
+  },
+  "environment": {
+    "python": "3.12.15",
+    "sklearn": "1.9.1",
+    "numpy": "2.5.4",
+    "pandas": "3.0.6"
+  }
+}

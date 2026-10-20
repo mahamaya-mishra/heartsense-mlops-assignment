@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+junit.xml
+htmlcov/
+build/
+dist/
+
+# Data (raw file is downloaded + checksum-verified; the clean CSV is committed)
+data/raw/
+
+# Experiment tracking (local store; CI uploads its own copy as an artifact)
+mlflow.db
+mlruns/
+mlartifacts/
+
+# Trained model binary is a build artifact (metadata.json is committed)
+model_store/*.joblib
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+*.log

@@ -1,0 +1,114 @@
+{
+  "rows": 303,
+  "columns": 14,
+  "positive_rate": 0.4587,
+  "missing_cells": 6,
+  "missing_by_column": {
+    "major_vessels": 4,
+    "thalassemia": 2
+  },
+  "continuous_summary": {
+    "age": {
+      "count": 303.0,
+      "mean": 54.44,
+      "std": 9.04,
+      "min": 29.0,
+      "25%": 48.0,
+      "50%": 56.0,
+      "75%": 61.0,
+      "max": 77.0
+    },
+    "resting_bp": {
+      "count": 303.0,
+      "mean": 131.69,
+      "std": 17.6,
+      "min": 94.0,
+      "25%": 120.0,
+      "50%": 130.0,
+      "75%": 140.0,
+      "max": 200.0
+    },
+    "cholesterol": {
+      "count": 303.0,
+      "mean": 246.69,
+      "std": 51.78,
+      "min": 126.0,
+      "25%": 211.0,
+      "50%": 241.0,
+      "75%": 275.0,
+      "max": 564.0
+    },
+    "max_heart_rate": {
+      "count": 303.0,
+      "mean": 149.61,
+      "std": 22.88,
+      "min": 71.0,
+      "25%": 133.5,
+      "50%": 153.0,
+      "75%": 166.0,
+      "max": 202.0
+    },
+    "st_depression": {
+      "count": 303.0,
+      "mean": 1.04,
+      "std": 1.16,
+      "min": 0.0,
+      "25%": 0.0,
+      "50%": 0.8,
+      "75%": 1.6,
+      "max": 6.2
+    }
+  },
+  "top_correlates_with_target": {
+    "thalassemia": 0.522,
+    "major_vessels": 0.489,
+    "chest_pain_type": 0.472,
+    "exercise_angina": 0.432,
+    "max_heart_rate": 0.423,
+    "st_depression": 0.413
+  },
+  "prevalence_by_category": {
+    "chest_pain_type": {
+      "typical angina": 0.304,
+      "atypical angina": 0.18,
+      "non-anginal": 0.209,
+      "asymptomatic": 0.729
+    },
+    "rest_ecg": {
+      "normal": 0.371,
+      "ST-T abnormality": 0.75,
+      "LV hypertrophy": 0.541
+    },
+    "st_slope": {
+      "upsloping": 0.254,
+      "flat": 0.65,
+      "downsloping": 0.571
+    },
+    "thalassemia": {
+      "normal": 0.223,
+      "fixed defect": 0.667,
+      "reversible defect": 0.761
+    },
+    "sex": {
+      "female": 0.258,
+      "male": 0.553
+    },
+    "fasting_blood_sugar": {
+      "<= 120 mg/dl": 0.453,
+      "> 120 mg/dl": 0.489
+    },
+    "exercise_angina": {
+      "no": 0.309,
+      "yes": 0.768
+    }
+  },
+  "figures": [
+    "reports/figures/eda/01_class_balance.png",
+    "reports/figures/eda/02_missing_values.png",
+    "reports/figures/eda/03_continuous_by_outcome.png",
+    "reports/figures/eda/04_prevalence_by_category.png",
+    "reports/figures/eda/05_correlation_heatmap.png",
+    "reports/figures/eda/06_age_vs_max_heart_rate.png",
+    "reports/figures/eda/07_st_depression_by_slope.png"
+  ]
+}

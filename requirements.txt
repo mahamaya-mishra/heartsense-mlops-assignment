@@ -1,0 +1,23 @@
+# Full development environment: training, tracking, EDA, tests, lint. Python 3.11+.
+#   python -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+-r requirements-api.txt
+-e .
+
+# Experiment tracking
+mlflow==3.17.1
+
+# EDA, plotting, notebook execution
+matplotlib==3.11.2
+seaborn==0.13.2
+nbformat==5.11.1
+nbconvert==7.17.2
+ipykernel==7.4.0
+
+# Quality
+pytest==9.1.1
+pytest-cov==7.1.0
+httpx==0.28.1
+ruff==0.17.1
+pyyaml==6.0.3
+tabulate==0.10.0
+requests==2.34.2

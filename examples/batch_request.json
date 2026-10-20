@@ -1,0 +1,12 @@
+{
+  "patients": [
+    {"age": 63, "sex": 1, "chest_pain_type": 4, "resting_bp": 150, "cholesterol": 290, "fasting_blood_sugar": 0,
+     "rest_ecg": 2, "max_heart_rate": 112, "exercise_angina": 1, "st_depression": 2.6, "st_slope": 2,
+     "major_vessels": 2, "thalassemia": 7},
+    {"age": 41, "sex": 0, "chest_pain_type": 2, "resting_bp": 118, "cholesterol": 198, "fasting_blood_sugar": 0,
+     "rest_ecg": 0, "max_heart_rate": 172, "exercise_angina": 0, "st_depression": 0.0, "st_slope": 1,
+     "major_vessels": 0, "thalassemia": 3},
+    {"age": 57, "sex": 1, "chest_pain_type": 3, "resting_bp": 132, "cholesterol": 240, "fasting_blood_sugar": 1,
+     "rest_ecg": 0, "max_heart_rate": 140, "exercise_angina": 0, "st_depression": 1.2, "st_slope": 2}
+  ]
+}

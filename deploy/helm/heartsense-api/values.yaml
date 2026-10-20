@@ -1,0 +1,62 @@
+# Default values for heartsense-api. Override with --set or -f.
+image:
+  repository: ghcr.io/mahamaya-mishra/heartsense-api   # replaced by scripts/deploy.sh / CI
+  tag: ""                                     # defaults to .Chart.AppVersion
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+service:
+  type: LoadBalancer          # minikube: `minikube tunnel` or port-forward; cloud: external IP
+  port: 8000
+  targetPort: 8000
+
+ingress:
+  enabled: false
+  className: nginx
+  host: heartsense.local
+  annotations: {}
+
+resources:
+  requests: {cpu: 100m, memory: 256Mi}
+  limits: {cpu: 500m, memory: 512Mi}
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+env:
+  LOG_LEVEL: INFO
+  MODEL_FILE: /srv/model_store/heartsense_pipeline.joblib
+  METADATA_FILE: /srv/model_store/metadata.json
+
+probes:
+  startup:   {path: /healthz, periodSeconds: 2, failureThreshold: 30}
+  readiness: {path: /readyz,  periodSeconds: 5, failureThreshold: 3}
+  liveness:  {path: /healthz, periodSeconds: 10, failureThreshold: 3}
+
+metrics:
+  enabled: true                 # adds prometheus.io/* pod annotations
+  path: /metrics
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile: {type: RuntimeDefault}
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities: {drop: ["ALL"]}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

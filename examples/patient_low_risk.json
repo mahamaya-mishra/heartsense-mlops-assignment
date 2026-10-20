@@ -1,0 +1,15 @@
+{
+  "age": 41,
+  "sex": 0,
+  "chest_pain_type": 2,
+  "resting_bp": 118,
+  "cholesterol": 198,
+  "fasting_blood_sugar": 0,
+  "rest_ecg": 0,
+  "max_heart_rate": 172,
+  "exercise_angina": 0,
+  "st_depression": 0.0,
+  "st_slope": 1,
+  "major_vessels": 0,
+  "thalassemia": 3
+}
