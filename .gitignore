@@ -31,3 +31,6 @@ model_store/*.joblib
 .idea/
 .vscode/
 *.log
+
+# local tooling
+.playwright/
