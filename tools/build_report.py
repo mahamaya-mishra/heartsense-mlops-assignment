@@ -794,7 +794,7 @@ def main() -> None:
         [
             ("Code: ", a.repo),
             ("CI runs: ", a.repo + "/actions"),
-            ("Container image: ", "ghcr.io/mahamaya-mishra/heartsense-api"),
+            ("Container image: ", "ghcr.io/mahamaya-mishra/heartsense-mlops-assignment"),
             ("Video: ", a.video),
             ("Dataset: ", "https://archive.ics.uci.edu/dataset/45/heart+disease (CC BY 4.0)"),
         ],

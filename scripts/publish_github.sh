@@ -15,7 +15,7 @@ fi
 git remote get-url origin >/dev/null 2>&1 || git remote add origin "https://github.com/${REPO}.git"
 git remote set-url origin "https://github.com/${REPO}.git"
 # Point the Helm chart and deploy script at this owner's GHCR namespace.
-sed -i.bak "s#ghcr.io/OWNER/#ghcr.io/${OWNER_LC}/#g" deploy/helm/heartsense-api/values.yaml scripts/deploy.sh README.md 2>/dev/null || true
+sed -i.bak "s#ghcr.io/OWNER/heartsense-api#ghcr.io/${OWNER_LC}/${REPO##*/}#g" deploy/helm/heartsense-api/values.yaml scripts/deploy.sh README.md 2>/dev/null || true
 find . -name "*.bak" -not -path "./.venv/*" -delete
 git add -A
 git diff --cached --quiet || git commit -q -m "chore: point image references at ghcr.io/${OWNER_LC}" || true

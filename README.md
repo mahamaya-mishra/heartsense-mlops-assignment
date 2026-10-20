@@ -103,7 +103,7 @@ bash scripts/smoke_test.sh http://127.0.0.1:8000       # readyz, metadata, 2 pre
 docker rm -f heartsense-api
 ```
 
-Or use the image CI publishes: `docker run -p 8000:8000 ghcr.io/mahamaya-mishra/heartsense-api:latest`.
+Or use the image CI publishes: `docker run -p 8000:8000 ghcr.io/mahamaya-mishra/heartsense-mlops-assignment:latest`.
 
 ### 5. Kubernetes (minikube) with monitoring
 

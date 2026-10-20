@@ -11,7 +11,7 @@ RELEASE="${RELEASE:-heartsense}"
 NAMESPACE="${NAMESPACE:-heartsense}"
 MON_NS="observability"
 PROFILE="${PROFILE:-heartsense}"
-GHCR_IMAGE="${GHCR_IMAGE:-ghcr.io/mahamaya-mishra/heartsense-api:latest}"
+GHCR_IMAGE="${GHCR_IMAGE:-ghcr.io/mahamaya-mishra/heartsense-mlops-assignment:latest}"
 IMAGE="${IMAGE:-${GHCR_IMAGE}}"
 REPO="${IMAGE%:*}"; TAG="${IMAGE##*:}"
 

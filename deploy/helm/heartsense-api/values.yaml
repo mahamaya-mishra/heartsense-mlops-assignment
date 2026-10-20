@@ -1,6 +1,6 @@
 # Default values for heartsense-api. Override with --set or -f.
 image:
-  repository: ghcr.io/mahamaya-mishra/heartsense-api   # replaced by scripts/deploy.sh / CI
+  repository: ghcr.io/mahamaya-mishra/heartsense-mlops-assignment   # replaced by scripts/deploy.sh / CI
   tag: ""                                     # defaults to .Chart.AppVersion
   pullPolicy: IfNotPresent
 
